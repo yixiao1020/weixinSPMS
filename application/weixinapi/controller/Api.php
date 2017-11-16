@@ -6,6 +6,7 @@ use app\weixinapi\model\weixinSDK;
 use app\weixinapi\model\News;
 class Api extends controller
 {
+	
    	public function test(){
 		$news = new News();
 		$res = $news::get(['trigger_key' => 2]);
