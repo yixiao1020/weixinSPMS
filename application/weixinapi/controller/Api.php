@@ -27,7 +27,12 @@ class Api extends controller
 		var_dump($arr);	
 	}
 	
-    
+	public function test1(){
+   		$url = "http://www.hao123.com";
+   		$weixinSDK = new weixinSDK();
+   		$res = $weixinSDK->curl($url);
+   		var_dump($res);
+   	}
      /**
      * 响应微信发送的Token验证
      * @param  [type] $signature [description]

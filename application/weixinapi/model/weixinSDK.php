@@ -82,4 +82,25 @@ class weixinSDK
         }
 
     }
+    
+     /**
+     * curl工具封装
+     * @param  [type]  $object   [description]
+     * @param  [type]  $url		 [description]
+     * @return [type]            [description]
+     */
+    public function curl($url){
+    	//初始化curl
+    	$ch	= curl_init();
+    	//设置curl的参数
+    	curl_setopt($ch,CURLOPT_URL,$url);
+    	curl_setopt($ch,CURLOPT_RETURNTRANSFER, 1);
+    	//采集
+    	$res = curl_exec($ch);
+    	if(curl_errno($ch)){
+    		return curl_error($ch);
+    	}
+    	curl_close($ch);
+    	return $res;
+    }
 }
