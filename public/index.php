@@ -11,7 +11,7 @@
 
 // [ 应用入口文件 ]
 // 定义项目名称
-define('App_NAME','DEMO');
+define('App_NAME','weixin');
 // 定义应用目录
 define('APP_PATH', __DIR__ . '/../application/');
 // 加载框架引导文件
