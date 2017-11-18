@@ -97,37 +97,6 @@ class Api extends controller
 	            
 	            case 'text':
 	            	
-	            	/*switch(strtolower($postObj->Content) ){
-	            		case '1':
-	            		//事件类型，为subscribe(订阅)则处理以下业务
-	       				$content		= "你好，我就是1222";
-	       				$weixinSDK->transmitText($postObj,$content);
-	       				break;	
-	       				
-	       				case '2':
-	       				$arr = [
-	       					[
-	       						"Title" 		=>"百度",	//标题 
-	       						"Description"	=>"有问题找百度"	,	//描述
-	       						"PicUrl"		=>"https://www.baidu.com/img/bd_logo1.png",	//图片地址
-	       						"Url"			=>"http://www.baidu.com",			//访问网址
-	       					],
-	       					[
-	       						"Title" 		=>"百度",	//标题 
-	       						"Description"	=>"有问题找百度"	,	//描述
-	       						"PicUrl"		=>"https://www.baidu.com/img/bd_logo1.png",	//图片地址
-	       						"Url"			=>"http://www.baidu.com",			//访问网址
-	       					],
-	       					[
-	       						"Title" 		=>"百度",	//标题 
-	       						"Description"	=>"有问题找百度"	,	//描述
-	       						"PicUrl"		=>"https://www.baidu.com/img/bd_logo1.png",	//图片地址
-	       						"Url"			=>"http://www.baidu.com",			//访问网址
-	       					],
-	       				];
-	       				$weixinSDK->transmitNews($postObj,$arr);
-	       				break;
-					}*/
 					$val = strtolower($postObj->Content);
 					$res = $news::get(['trigger_key' => $val]);
 					$type = $res->type;
