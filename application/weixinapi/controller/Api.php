@@ -27,12 +27,6 @@ class Api extends controller
 		var_dump($arr);	
 	}
 	
-	public function test1(){
-   		$url = "http://www.hao123.com";
-   		$weixinSDK = new weixinSDK();
-   		$res = $weixinSDK->curl($url);
-   		var_dump($res);
-   	}
      /**
      * 响应微信发送的Token验证
      * @param  [type] $signature [description]
@@ -80,56 +74,30 @@ class Api extends controller
     public function reposeMsg(){
     	//接收微信发送过来的数据包
         $postStr = file_get_contents("php://input"); 
-		$news = new News();
+		
         if (!empty($postStr)){
-        	$weixinSDK = new weixinSDK();
+        	//$weixinSDK = new weixinSDK();
             $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
             Log::write($postObj); //写日志
             switch(strtolower($postObj->MsgType)){
             	case 'event':
             		//如果消息类型为event则处理以下业务
-	            	if(strtolower($postObj->Event) == 'subscribe'){
-	            		//事件类型，为subscribe(订阅)则处理以下业务
-	        			$content		= "你好，欢迎关注我们1111！";
-	            		$weixinSDK->transmitText($postObj,$content);
+	            	switch(strtolower($postObj->Event)){
+	            		case 'subscribe'://事件类型，为subscribe(订阅)则处理以下业务
+	        				$val = 'subscribe';
+							$this->msgType($val,$postObj);
+	            		break;
+	            		
+	            		case 'click'://事件类型，为点击事件时
+	        				$val = strtolower($postObj->EventKey);
+							$this->msgType($val,$postObj);
+	            		break;
 	            	}	
 	            break;	
 	            
 	            case 'text':
-	            	
 					$val = strtolower($postObj->Content);
-					$res = $news::get(['trigger_key' => $val]);
-					$type = $res->type;
-					switch($type){
-						case 1:
-						if($res){
-							$content =$res->content;
-							$weixinSDK->transmitText($postObj,$content);
-						}else{
-							return false;
-						}
-						break;
-						
-						case 6:
-						if($res){
-							$nwesid = $res->newsid;
-							$lists = $news->getNews($nwesid);
-							$arr = [];
-							$res1 = [];
-							foreach ($lists as $vo){
-								$res1['Title' ]			=$vo->title;
-								$res1['Description' ]	=$vo->description;
-								$res1['PicUrl' ]		=$vo->pic_url;
-								$res1['Url' ]			=$vo->url;
-								$arr[] =$res1;
-							}
-							$weixinSDK->transmitNews($postObj,$arr);
-						}else{
-							return false;
-						}
-						break;	
-					}
-					
+					$this->msgType($val,$postObj);
 				break;	
             }
         }else{
@@ -137,5 +105,90 @@ class Api extends controller
             exit;
         }
     }
-
+    
+    public function msgType($val,$postObj){
+    	$news = new News();
+    	$weixinSDK = new weixinSDK();
+    		$res = $news::get(['trigger_key' => $val]);
+			$type = $res->type;
+			switch($type){
+				case 1:
+					if($res){
+						$content =$res->content;
+						$weixinSDK->transmitText($postObj,$content);
+					}else{
+						return false;
+					}
+				break;
+						
+				case 6:
+					if($res){
+						$nwesid = $res->newsid;
+						$lists = $news->getNews($nwesid);
+						$arr = [];
+						$res1 = [];
+						foreach ($lists as $vo){
+							$res1['Title' ]			=$vo->title;
+							$res1['Description' ]	=$vo->description;
+							$res1['PicUrl' ]		=$vo->pic_url;
+							$res1['Url' ]			=$vo->url;
+							$arr[] =$res1;
+						}
+						$weixinSDK->transmitNews($postObj,$arr);
+					}else{
+						return false;
+					}
+				break;	
+			}
+    }
+    
+/*获取微信服务器IP*/
+	public function getWxServerIp(){
+		$weixinSDK 		=new weixinSDK();
+		$accessToken	= $weixinSDK->getToken()['accessToken'];
+		$url			= "https://api.weixin.qq.com/cgi-bin/getcallbackip?access_token=$accessToken";
+		$res			= $weixinSDK->curl($url);
+		
+		var_dump($res);
+	}
+	
+	/*创建微信自定义菜单*/
+	public function createMenu(){
+		$weixinSDK 		=new weixinSDK();
+		$accessToken	= $weixinSDK->getToken()['accessToken'];
+		$arrMenu		= [
+						    "button"=>[
+							    [	
+							       	"type"=>"click",
+							        "name"=>urlencode("今日歌曲"),
+							        "key"=>"1"
+							    ],
+						      	[
+						           "name"=>urlencode("菜单"),
+						           "sub_button"=>[
+							           [	
+							               "type"=>"view",
+							               "name"=>urlencode("搜索"),
+							               "url"=>"http://www.soso.com/"
+							            ],
+							            [
+							               "type"=>"click",
+							               "name"=>urlencode("赞一下"),
+							               "key"=>"2"
+							            ]
+						        	]
+						       	],
+						       	[	
+							       	"type"=>"view",
+							        "name"=>urlencode("百度"),
+							        "url"=>"http://www.baidu.com/"
+							    ]
+						    ]
+						];
+		$jsonmenu 		=urldecode(json_encode($arrMenu));
+		$url			= "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=$accessToken";
+		$res			= $weixinSDK->curl($url,'post',$jsonmenu);
+		
+		return $jsonmenu .'<br/>'.$res."<br/>accesstoken:".$accessToken;
+	}
 }
