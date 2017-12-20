@@ -114,7 +114,12 @@ class weixinSDK
     	curl_close($ch);
     	return $res;
     }
-    
+  /**  
+	* 获取accessToken，微信平台全局使用票据
+	* @access public 
+	* @param mixed  $arg1 
+	* @return array 返回token值和过期时间
+	*/ 
     public function getToken(){
     	if(Session::get('accessToken')&&time() < Session::get('expires_time')){
     		return ['accessToken'=>Session::get('accessToken'),'expires_time'=>Session::get('expires_time')] ;
@@ -132,5 +137,50 @@ class weixinSDK
 	   			return "access_token获取失败败，错误码：".$arr['errcode'];
 	   		}
     	}
+   	}
+   	
+   	/**  
+	* 获取jsapi_ticket,jsapi_ticket是公众号用于调用微信JS接口的临时票据,有效期为7200秒,有效期为7200秒
+	* @access public 
+	* @param mixed  $arg1 
+	* @return array 返回jsapi_ticket值和过期时间
+	*/ 
+    public function getJsapiTicket(){
+    	if(Session::get('ticket')&&time() < Session::get('ticket_expires_time')){
+    		return ['ticket'=>Session::get('ticket'),'ticket_expires_time'=>Session::get('ticket_expires_time')] ;
+    	}else{
+			$accessToken= $this->getToken()['accessToken'];
+	   		$url 		= "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=$accessToken&type=jsapi";
+	   		$res 		= $this->curl($url);
+	   		$arr		=json_decode($res,true);
+	   		
+	   		if(isset($arr['ticket'])){
+	   			Session::set('ticket',$arr['ticket']);
+	   			Session::set('ticket_expires_time',time()+7000);
+	   			return ['ticket'=>Session::get('ticket'),'ticket_expires_time'=>Session::get('ticket_expires_time')] ;
+	   		}else{
+	   			return "ticket获取失败败";
+	   		}
+    	}
+   	}
+   	
+  /**  
+	* 获取传入变量值长度的随机字符串
+	* @access public 
+	* @param mixed $num 必须为大于0的整数 
+	* @return string 返回传入的数字长度的随机字符串
+	*/ 
+   	public function getRandCode($num){
+   		$arr 	= ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+   				   'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+   				   '0','1','2','3','4','5','6','7','8','9'
+   				];
+   		$max 	= count($arr);
+   		$tmpstr = '';
+   		
+   		for ($i = 1; $i <= $num ; $i++){
+   			$tmpstr .= $arr[rand(0,$max-1)];
+   		}
+   		return $tmpstr; 
    	}
 }
