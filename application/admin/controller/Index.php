@@ -1,10 +1,8 @@
 <?php
-namespace app\index\controller;
+namespace app\admin\controller;
 use think\Controller;
 use think\Log;
 use think\Session;
-use app\weixinapi\model\weixinSDK;
-use app\model\Navs;
 
 class Index extends controller
 {
@@ -12,43 +10,7 @@ class Index extends controller
     {
 		return $this->fetch();
     }
-    
-    public function share(){
-    	$weixinSDK 			= new weixinSDK();
-    	$jsapi_ticket 		= $weixinSDK->getJsapiTicket()['ticket'];
-    	$appId				= weixinSDK::$AppID;
-    	$timestamp			= time();
-    	$nonceStr			= $weixinSDK->getRandCode(16);
-    	$url				= "http://xb.214love.cn/index/index/share";
-    	$signature			= "jsapi_ticket=$jsapi_ticket&noncestr=$nonceStr&timestamp=$timestamp&url=$url";
-    	$signature			= sha1($signature);
-    	$getQRcode			= $this->getQRcode();
-    	$this->assign(['appId'=>$appId,'timestamp'=>$timestamp,'nonceStr'=>$nonceStr,'signature'=>$signature,'getQRcode'=>$getQRcode]);
-    	//return $getQRcode;
-    	return $this->fetch();
-    	
-    }
 
-	public function getQRcode(){
-		$weixinSDK 		= new weixinSDK();
-		$accessToken	= $weixinSDK->getToken()['accessToken'];
-		$url			= "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=$accessToken";
-		$postArr		= [
-							"expire_seconds" 	=> 604800,
-							"action_name"		=> "QR_STR_SCENE",
-							"action_info"		=> ["scene" => ["scene_str" => "xuxian"]],
-						  ];
-		$postJosn 		= json_encode($postArr);
-		$res			= $weixinSDK->curl($url,'post',$postJosn);
-		$QRinfo			= json_decode($res,true);
-		$url 			= $QRinfo['url'];
-		//var_dump($QRinfo);die;
-		//$ticket 		= urlencode($QRinfo['ticket']);
-		//$QRurl			= "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=$ticket";
-		//$qrcode			= $weixinSDK->curl($url);
-		//var_dump( $qrcode);
-		return $url;
-	}
 	/**
 	 * 递归方法创建无极限分类DEMO
 	 */

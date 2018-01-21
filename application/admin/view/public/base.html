@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+	{block name="meta"}{include file="public/meta" /}{/block}
+    {block name="title"}<title>title</title>{/block}
+    {block name="style"}{include file="public/style" /}{/block}
+</head>
+
+<body data-type="index">
+	<!--顶部导航条-->
+	{block name="header"}{include file="public/header" /}{/block}
+	
+    <div class="tpl-page-container tpl-page-header-fixed">
+       <!--侧边菜单-->
+		{block name="sidemenu"}{include file="public/sidemenu" /}{/block}
+		<div class="tpl-content-wrapper">
+			<!--主体内容导航-->
+			{block name="contentnav"}{include file="public/contentnav"}{/block}
+			<!--主体内容-->
+			{block name="content"}{/block}
+		</div>
+    </div>
+    {block name="footer"}{include file="public/footer" /}{/block}
+    {block name="script"}{include file="public/script" /}{/block}
+</body>
+</html>

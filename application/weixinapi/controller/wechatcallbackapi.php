@@ -1,7 +1,7 @@
 <?php
 namespace app\weixinapi\controller;
-use app\weixinapi\model\weixinSDK;
-use app\weixinapi\model\News;
+use app\service\weixinSDK;
+use app\model\News;
 use think\Log;
 
 class wechatcallbackapi extends controller

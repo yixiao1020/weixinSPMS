@@ -4,8 +4,8 @@ use think\Controller;
 use think\Request;
 use think\Session;
 use think\Log;
-use app\weixinapi\model\weixinSDK;
-use app\weixinapi\model\News;
+use app\service\weixinSDK;
+use app\model\News;
 class Api extends controller
 {
 	
@@ -79,7 +79,7 @@ class Api extends controller
         $postStr = file_get_contents("php://input"); 
         if (!empty($postStr)){
             $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
-            Log::write($postObj); //写日志
+            Log::write($postObj,"微信服务回传信息"); //写日志
             switch(strtolower($postObj->MsgType)){
             	//事件类型回复消息处理方法
             	case 'event':
@@ -92,6 +92,13 @@ class Api extends controller
 	            		//点击类型事件消息处理
 	            		case 'click'://事件类型，为点击事件时
 	        				$val = strtolower($postObj->EventKey);
+							$this->msgType($val,$postObj);
+	            		break;
+	            		
+	            		//场景类型事件消息处理
+	            		case 'scan'://事件类型，为点击事件时
+	        				$val = strtolower($postObj->EventKey);
+	        				log::write($val,"场景参数");die;
 							$this->msgType($val,$postObj);
 	            		break;
 	            	}	
@@ -204,7 +211,7 @@ class Api extends controller
 		//1 第一步：用户同意授权，获取code
 		$weixinSDK 		=new weixinSDK();
 		$authorization	= 2;															//定义授权方式1为静默授权，2为全面授权
-		$appid 			= $weixinSDK ->weixinparameter()['appid'];
+		$appid 			= weixinSDK::$AppID;
 		$redirect_uri	= urlencode("http://xb.214love.cn/weixinapi/api/getUserInfo");
 		if($authorization == 1){
 			$scope = "snsapi_base";
@@ -227,14 +234,15 @@ class Api extends controller
 			return Session::get('userInfo')."缓存信息";
 		}
 		
-		$appid 			= $weixinSDK ->weixinparameter()['appid'];
-		$appsecret 		= $weixinSDK ->weixinparameter()['appsecret'];
+		$appid 			= weixinSDK::$AppID;
+		$appsecret 		= weixinSDK::$AppSecret;
 		$code 			= $_GET["code"];
 		$url 			= "https://api.weixin.qq.com/sns/oauth2/access_token?appid=$appid&secret=$appsecret&code=$code&grant_type=authorization_code";
 		$res 			= $weixinSDK ->curl($url);
 		$arr			= json_decode($res,true);	//把接收到微信传过来的JSON数据转为数组
 		
 		if(isset($arr['errcode'])){
+			log::wirte("操作失败,错误码：".$arr['errcode'].",错误信息：".$arr['errmsg'],"error");
 			return "操作失败,错误码：".$arr['errcode'].",错误信息：".$arr['errmsg'];
 		}
 		
@@ -245,9 +253,9 @@ class Api extends controller
 			return $openid;
 		}
 		if($authorization ==2){
-			$userUrl	= "https://api.weixin.qq.com/sns/userinfo?access_token=$access_token&openid=$openid&lang=zh_CN";
-			$userInfo	= $weixinSDK ->curl($userUrl);
-			$userInfoArr			= json_decode($userInfo,true);
+			$userUrl		= "https://api.weixin.qq.com/sns/userinfo?access_token=$access_token&openid=$openid&lang=zh_CN";
+			$userInfo		= $weixinSDK ->curl($userUrl);
+			$userInfoArr	= json_decode($userInfo,true);
 			Session::set('userOpenid',$userInfoArr['openid']);
 			Session::set('userInfo',$userInfo);
 			//var_dump(Session::get('userInfoArr')['openid']);
@@ -255,4 +263,10 @@ class Api extends controller
 		}
 	}
 	
+	public function getss(){
+		$weixin = new weixinSDK();
+   		$as = $weixin->getToken()['accessToken'];
+   		return $as;
+   	}
+
 }

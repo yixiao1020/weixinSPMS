@@ -1,16 +1,14 @@
 <?php
-namespace app\weixinapi\model;
+namespace app\service\model;
 use think\Session;
 use think\Log;
 
 class weixinSDK
 {
 	//微信参数设置
-	public function weixinparameter(){
-		$AppID		= "wx6da29af1c50cd281";
-		$AppSecret	= "0cd545e175743db2d9d18aeab8b3b313";
-		return ['appid'=>$AppID,'appsecret'=>$AppSecret];
-	}
+	public static $AppID		= "wx6da29af1c50cd281";
+	public static $AppSecret	= "0cd545e175743db2d9d18aeab8b3b313";
+
 
   	/**
      * 文本消息转xml
@@ -124,8 +122,8 @@ class weixinSDK
     	if(Session::get('accessToken')&&time() < Session::get('expires_time')){
     		return ['accessToken'=>Session::get('accessToken'),'expires_time'=>Session::get('expires_time')] ;
     	}else{
-			$appid 		= $this->weixinparameter()['appid'];
-			$appsecret	= $this->weixinparameter()['appsecret'];
+			$appid 		= self::$AppID;
+			$appsecret	= self::$AppSecret;
 	   		$url 		= "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=$appid&secret=$appsecret";
 	   		$res 		= $this->curl($url);
 	   		$arr		=json_decode($res,true);
@@ -183,4 +181,5 @@ class weixinSDK
    		}
    		return $tmpstr; 
    	}
+   	
 }
